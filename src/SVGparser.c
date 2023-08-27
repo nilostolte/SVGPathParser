@@ -76,8 +76,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
+#include <float.h>
 
-#define DEBUG       // when defined it print traces
+//#define DEBUG       // when defined it print traces
 //#define VERBOSE   // when not defined it uses only 3 digits after the decimal point
 #define NSVG_INLINE inline
 
@@ -96,9 +97,11 @@
 // macro to convert a float pointer to a 32 bits integer pointer
 #define command(p) ((int32_t *)(p))       
 // macro to round and trucate at 3 digits after the decimal point 
-#define dig3(n) (trunc(roundf((n)*1000.0f))/1000.0f)
+#define dig3(n) (roundf((n)*1000.0f)/1000.0f)
+
 
 #ifdef VERBOSE
+#define trnc(a) (a)
 char *L_format = "L%f,%f ";
 char *H_format = "H%f ";
 char *V_format = "V%f ";
@@ -106,6 +109,7 @@ char *l_format = "l%f,%f ";
 char *h_format = "h%f ";
 char *v_format = "v%f ";
 #else
+#define trnc(a) dig3(a)
 char *L_format = "L%g,%g ";
 char *H_format = "H%g ";
 char *V_format = "V%g ";
@@ -113,6 +117,8 @@ char *l_format = "l%g,%g ";
 char *h_format = "h%g ";
 char *v_format = "v%g ";
 #endif
+
+#define ITEM_SIZE 64
 
 /* Types */
 
@@ -242,7 +248,7 @@ static double str2f(const char* s) {
 	return res * sign;
 }
 
-static const char* parseNumber(const char* s, char* it, const int size)
+static char* parseNumber(char* s, char* it, const int size)
 {
 	const int last = size-1;
 	int i = 0;
@@ -380,7 +386,7 @@ static void vectorMatrixMultiply(float* dx, float* dy, float x, float y, float* 
 }
 
 static float getRotationAngleFromMatrix(float* t) {
-	return(atan2(t[1], t[2]));
+	return(atan2(t[1], t[0])*180.0f/NSVG_PI);
 }
 
 /* end generic fuctions */
@@ -517,11 +523,11 @@ static void arcto(SVGPathparser* p, float* args, float x, float y) {
 		p->elements[p->size+3] = args[2];
 		p->elements[p->size+4] = args[3];
 		p->elements[p->size+5] = args[4];
-		p->elements[p->size+5] = x;
-		p->elements[p->size+6] = y;
+		p->elements[p->size+6] = x;
+		p->elements[p->size+7] = y;
 		p->size+=8;
 #ifdef DEBUG
-		printf("arcto: %f %f ", args[0],args[1],args[2],args[3],args[4],x, y);
+		printf("arcto: %f %f %f %f %f %f %f\n", args[0],args[1],args[2],args[3],args[4],x, y);
 #endif
 	}
 }
@@ -737,6 +743,7 @@ static void nsvg__addPath(SVGPathparser* p, char closed)
 	int i, j;
 	int nargs;
 	int32_t cmd;
+	float xmin, ymin, xmax, ymax;
 	if (p->size < 4)
 		return;
 
@@ -760,8 +767,13 @@ static void nsvg__addPath(SVGPathparser* p, char closed)
 		*command(path->elements+i) = cmd = *command(p->elements+i);
 		nargs = cmd >> 8;    // get number of argments from command code
 		if (nargs < 7) { // for every one except arcs
-			for (j = 1; j < nargs; j+=2 ) 
+			for (j = 1; j < nargs; j+=2 ) {
 			   pointMatrixMultiply(&path->elements[i+j], &path->elements[i+j+1], p->elements[i+j], p->elements[i+j+1], p->matrix);
+               xmin = nsvg__minf(path->elements[i+j],xmin);
+			   ymin = nsvg__minf(path->elements[i+j+1],ymin);
+			   xmax = nsvg__maxf(path->elements[i+j],xmax);
+			   ymax = nsvg__maxf(path->elements[i+j+1],ymax);
+			}
 			i += j;
 			continue;
 		}
@@ -772,12 +784,15 @@ static void nsvg__addPath(SVGPathparser* p, char closed)
 		path->elements[i+4] = p->elements[i+4]; // remains constant
 		path->elements[i+5] = p->elements[i+5]; // remains constant
 		pointMatrixMultiply(&path->elements[i+6], &path->elements[i+7], p->elements[i+6], p->elements[i+7], p->matrix);
+        xmin = nsvg__minf(path->elements[i+6],xmin);
+	    ymin = nsvg__minf(path->elements[i+7],ymin);
+        xmax = nsvg__maxf(path->elements[i+6],xmax);
+        ymax = nsvg__maxf(path->elements[i+7],ymax);
 		i += 8;
 	}
 
 	path->next = p->plist;
 	p->plist = path;
-
 	return;
 
 error:
@@ -796,7 +811,7 @@ static float nsvg__getAverageScale(float* t)
 }
 
 
-static const char* nsvg__getNextPathItemWhenArcFlag(const char* s, char* it)
+static char* nsvg__getNextPathItemWhenArcFlag(char* s, char* it)
 {
 	it[0] = '\0';
 	while (*s && (space(*s) || *s == ',')) s++;
@@ -809,14 +824,14 @@ static const char* nsvg__getNextPathItemWhenArcFlag(const char* s, char* it)
 	return s;
 }
 
-static const char* nsvg__getNextPathItem(const char* s, char* it)
+static char* nsvg__getNextPathItem(char* s, char* it)
 {
 	it[0] = '\0';
 	// Skip white spaces and commas
 	while (*s && (space(*s) || *s == ',')) s++;
 	if (!*s) return s;
 	if (*s == '-' || *s == '+' || *s == '.' || digit(*s)) {
-		s = parseNumber(s, it, 64);
+		s = parseNumber(s, it, ITEM_SIZE);
 	} else {
 		// Parse command
 		it[0] = *s++;
@@ -827,7 +842,7 @@ static const char* nsvg__getNextPathItem(const char* s, char* it)
 	return s;
 }
 
-static void nsvg__parsePath(SVGPathparser* p, const char*s)
+static void nsvg__parsePath(SVGPathparser* p, char*s)
 {
 	char cmd = '\0';
 	float args[10];
@@ -838,8 +853,7 @@ static void nsvg__parsePath(SVGPathparser* p, const char*s)
 	const char* tmp[4];
 	char closedFlag;
 	int i;
-	char item[64];
-
+	char item[ITEM_SIZE];
 	if (s) {
 		nsvg__resetPath(p);
 		cpx = 0; cpy = 0;
@@ -847,7 +861,6 @@ static void nsvg__parsePath(SVGPathparser* p, const char*s)
 		initPoint = 0;
 		closedFlag = 0;
 		nargs = 0;
-
 		while (*s) {
 			item[0] = '\0';
 			if ((cmd == 'A' || cmd == 'a') && (nargs == 3 || nargs == 4))
@@ -914,6 +927,7 @@ static void nsvg__parsePath(SVGPathparser* p, const char*s)
 							}
 							break;
 					}
+
 					nargs = 0;
 				}
 			} else {
@@ -975,8 +989,6 @@ static void generateAbsoluteSVG(SVGpath* path) {
 	int i, j, nargs;
 	int32_t cmd;
 	float cpx, cpy, x, y;
-	float xmin, ymin, xmax, ymax;
-	xmin = xmax = path->elements[0]; ymin = ymax = path->elements[1];
 	for( p = path; p; p = p->next){
 		elements = p->elements;
 		size = p->size;
@@ -984,14 +996,10 @@ static void generateAbsoluteSVG(SVGpath* path) {
 		printf("M%f,%f ", elements[0], elements[1]);
 		cpx = elements[0]; cpy = elements[1];
 #else
-		printf("M%.3f,%.3f ", dig3(elements[0]), dig3(elements[1]));
+		printf("M%g,%g ", dig3(elements[0]), dig3(elements[1]));
 		cpx = dig3(elements[0]); cpy = dig3(elements[1]);
 #endif
 		for (i = 2; i < size; ) {
-			xmin = nsvg__minf(cpx,xmin);
-			ymin = nsvg__minf(cpy,ymin);
-			xmax = nsvg__maxf(cpx,xmax);
-			ymax = nsvg__maxf(cpy,ymax);
 			cmd = *command(p->elements+i);
 			if (cmd == LINETO) {
 #ifdef VERBOSE
@@ -1040,7 +1048,7 @@ static void generateAbsoluteSVG(SVGpath* path) {
 			);
 			cpx = p->elements[i+6]; cpy = p->elements[i+7];
 #else
-			printf("%g,%g %g %gf %g %g,%g ", 
+			printf("%g,%g %g %g %g %g,%g ", 
 				dig3(p->elements[i+1]), dig3(p->elements[i+2]), dig3(p->elements[i+3]), 
 				dig3(p->elements[i+4]), dig3(p->elements[i+5]), dig3(p->elements[i+6]), 
 				dig3(p->elements[i+7])
@@ -1050,8 +1058,6 @@ static void generateAbsoluteSVG(SVGpath* path) {
 			i += 8;			
 		}
 	}
-	printf("\n");
-	printf("Bounding Box: [%f %f %f %f]\n", xmin, ymin, xmax, ymax);
 }
 
 static void generateRelativeSVG(SVGpath* path) {
@@ -1061,43 +1067,36 @@ static void generateRelativeSVG(SVGpath* path) {
 	int i, j, nargs;
 	int32_t cmd;
 	float cpx, cpy, x, y;
-	float xmin, ymin, xmax, ymax;
-	xmin = xmax = path->elements[0]; ymin = ymax = path->elements[1];
 	for( p = path; p; p = p->next){
 		elements = p->elements;
 		size = p->size;
 #ifdef VERBOSE
 		printf("M%f,%f ", elements[0], elements[1]);
-		cpx = elements[0]; cpy = elements[1];
 #else
-		printf("M%.3f,%.3f ", dig3(elements[0]), dig3(elements[1]));
-		cpx = dig3(elements[0]); cpy = dig3(elements[1]);
+		printf("M%g,%g ", dig3(elements[0]), dig3(elements[1]));
 #endif
+        cpx = elements[0]; cpy = elements[1];
 		for (i = 2; i < size; ) {
-			xmin = nsvg__minf(cpx,xmin);
-			ymin = nsvg__minf(cpy,ymin);
-			xmax = nsvg__maxf(cpx,xmax);
-			ymax = nsvg__maxf(cpy,ymax);
 			cmd = *command(p->elements+i);
 			if (cmd == LINETO) {
-#ifdef VERBOSE
-				x = p->elements[i+1]; y = p->elements[i+2]);
-#else
-				x = dig3(p->elements[i+1]); y = dig3(p->elements[i+2]);
-#endif
+				x = p->elements[i+1]; y = p->elements[i+2];
 				if ( x == cpx ) {
-				   printf(v_format, y - cpy);
-				   cpy = y;
+					if ( y != cpy) {
+					    printf(v_format, trnc(y - cpy));
+				        cpy = y;
+					}
 				   i+=3;
 				   continue;
 				}
 				if ( y == cpy ) {
-				   printf(h_format, x - cpx);
-				   cpx = x;
+					if ( x != cpx ) {
+						printf(h_format, trnc(x - cpx));
+						cpx = x;
+					}
 				   i+=3;
 				   continue;
 				}
-				printf(l_format, x - cpx, y - cpy);
+				printf(l_format, trnc(x - cpx), trnc(y - cpy));
 				cpx = x; cpy = y;
 				i+=3;
 				continue;
@@ -1112,7 +1111,7 @@ static void generateRelativeSVG(SVGpath* path) {
               cpx = p->elements[i-2]; cpy = p->elements[i-1];
 #else
               for (j = 1; j < nargs; j += 2 )
-				 printf("%g,%g ", dig3(p->elements[i+j] - cpx),dig3(p->elements[i+j+1]) - cpy);
+				 printf("%g,%g ", dig3(p->elements[i+j] - cpx),dig3(p->elements[i+j+1] - cpy));
               i += j;
               cpx = dig3(p->elements[i-2]); cpy = dig3(p->elements[i-1]);
 #endif				   		
@@ -1126,7 +1125,7 @@ static void generateRelativeSVG(SVGpath* path) {
 			);
 			cpx = p->elements[i+6]; cpy = p->elements[i+7];
 #else
-			printf("%g,%g %g %gf %g %g,%g ", 
+			printf("%g,%g %g %g %g %g,%g ", 
 				dig3(p->elements[i+1]), dig3(p->elements[i+2]), dig3(p->elements[i+3]), 
 				dig3(p->elements[i+4]), dig3(p->elements[i+5]), dig3(p->elements[i+6] - cpx), 
 				dig3(p->elements[i+7] - cpy)
@@ -1136,8 +1135,6 @@ static void generateRelativeSVG(SVGpath* path) {
 			i += 8;			
 		}
 	}
-	printf("\n");
-	printf("Bounding Box: [%f %f %f %f]\n", xmin, ymin, xmax, ymax);
 }
 
 static SVGPathparser* nsvg__createParser(void){
@@ -1163,10 +1160,16 @@ error:
 int main(int argc, char *argv[]) {
 	char c, c1, c2;
 	char* d = NULL;
-	float* m = NULL ;
+	char* n;
+	char item[ITEM_SIZE];
+	char *pars = NULL;
+	char *end = NULL;
 	float t[] = { 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
 	int absolute = 1; // generate absolute code by default
-	int i;
+	int angle = 0;    // flag to indicate an angle was given
+	int matrix = 0;   // flag to indicate a matrix was given
+	float a, ang = 0.0f; 
+	int i,j;
 #ifdef DEBUG
 	printf("**start**\n");
 #endif
@@ -1178,45 +1181,71 @@ int main(int argc, char *argv[]) {
 		c1 = *argv[i];
 		if (c1 == '-') {
 			c2 = *(argv[i]+1);
+			n = argv[i]+2;
+			if (c2 == 'p' || c2 == 'P') {
+				pars = argv[i]+2;                      // extra attributes of the path like color stroke width, etc.
+				continue;
+			}
+			if (c2 == 'e' || c2 == 'E') {
+				end = argv[i]+2;                      // end of path data to be added to the end of a path (ex. 'z')
+				continue;
+			}
+			if (c2 == 'a' || c2 == 'A') {
+				if (angle) continue;                 // if angle already given, ignore new one
+				angle = 1;
+				n = parseNumber(n, item, ITEM_SIZE);
+				if (!*item) continue;                // angle is not anumber or not given. ignore
+				ang = str2f(item);     
+#ifdef DEBUG
+				printf("%f\n",ang);
+#endif          // if it doesn't match matrix, ignore it
+				if (matrix && (truncf(ang) != truncf(a))) continue;
+				p->angle = ang;                      // matches matrix or new angle
+				continue;
+			}
 			if (c2 == 'r' || c2 == 'R') {
 				absolute = 0;
 				continue;
 			}
 			if (c2 == 'm' || c2 == 'M') {
-				sscanf(
-					argv[i]+2,
-					"%f%*[^ ]%f%*[^ ]%f%*[^ ]%f%*[^ ]%f%*[^ ]%f",
-					&t[0],&t[1],&t[2],&t[3],&t[4],&t[5],&t[6]
-				);
+				if (matrix) continue;                 // if already given, ignore new one
+				matrix = 1;
+				for (j = 0; j < 6; j++) {
+				   while (*n && space(*n)) n++;
+				   n = parseNumber(n, item, ITEM_SIZE);
+				   if (!*item) break;                 // matrix incomplete. exit loop
+				   t[j] = str2f(item);
+				}
+				if (!*item) continue;                 // matrix incomplete. ignore
 				copyMatrix(p->matrix, t);
+				a = getRotationAngleFromMatrix(t);    // mismatch with matrix, take matrix
+				if (truncf(ang) != truncf(a)) p->angle = a;			
 #ifdef DEBUG
-				printf("[%f %f %f %f %f %f]\n",t[0],t[1],t[2],t[3],t[3],t[5],t[6]);
+				printf("[%f %f %f %f %f %f]\n",t[0],t[1],t[2],t[3],t[4],t[5],t[6]);
+				printf("ang: %f - angle calculated: %f - angle stored: %f\n", ang, a, p->angle);
 #endif
 				continue;
 			}
 			continue;
 		}
-		d = argv[i];
+		d = argv[i]; // it's no a flag, thus, we assume it's the path
 	}
+	if (angle && !matrix) setRotationInMatrix(p->matrix, ang * NSVG_PI / 180.0f);
 #ifdef DEBUG
+	copyMatrix(t, p->matrix);
+    printf("final matrix: [%f %f %f %f %f %f]\n",t[0],t[1],t[2],t[3],t[4],t[5],t[6]);
 	printf("**parsing*\n");
 #endif
-    if (d == NULL) 
-		nsvg__parsePath(p, 
-			"M478.038,138.533 L444.334,33.096 c-0.372-1.164-0.723-2.152-1.263-2.811 "
-			"c-0.926-1.127-2.207-1.719-3.931-1.719 c-1.723,0-3.004,0.592-3.931,1.719 "
-			"c-0.539,0.658-0.891,1.646-1.262,2.811 l-33.703,105.437 h-30.167l36.815-115.177 "
-			"c1.918-6,4.66-11.094,8.139-14.488 C421.002,3.047,428.038,0,439.141,0 "
-			"s18.14,3.047,24.109,8.867 c3.479,3.395,6.221,8.488,8.14,14.488l36.814,115.177"
-			"H478.038"
-		);
-	else
-		nsvg__parsePath(p,d);
+	nsvg__parsePath(p,d);
 #ifdef DEBUG
 	printf("**generating SVG with %s coordinates**\n", ((absolute)? "absolute" : "relative"));
 #endif
+	if  (!pars) printf("<path d=\"");
+	else  printf("<path %s d=\"", pars);
 	if (absolute) generateAbsoluteSVG(p->plist);
 	else generateRelativeSVG(p->plist);
+	if (!end) printf("\"/>\n");
+	else printf("%s\"/>\n", end);
 #ifdef DEBUG
 	printf("**finished**\n");
 #endif

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -2 430 204">
+<path fill="none" stroke="red" stroke-width="2" d="M210,100 a100,50 0 1 1 0,-1 z"/>
+<path fill="none" stroke="green" stroke-width="2" d="M180.711,170.711 a100,50 45 1 1 0.707,-0.707 z"/>
+<path fill="none" stroke="blue" stroke-width="2" d="M110,200 a100,50 90 1 1 1,0 z"/>
+<path fill="none" stroke="magenta" stroke-width="2" d="M39.289,170.711 a100,50 135 1 1 0.707,0.707 z"/>
+<path fill="none" stroke="#efdf00" stroke-width="2" d="M420,100 a100,50 0 1 1 0,-1 z"/>
+<path fill="none" stroke="green" stroke-width="2" d="M406.603,150 a100,50 30 1 1 0.5,-0.866 z"/>
+<path fill="none" stroke="cyan" stroke-width="2" d="M370,186.603 a100,50 60 1 1 0.866,-0.5 z"/>
+<path fill="none" stroke="red" stroke-width="2" d="M320,200 a100,50 90 1 1 1,0 z"/>
+<path fill="none" stroke="magenta" stroke-width="2" d="M270,186.603 a100,50 120 1 1 0.866,0.5 z"/>
+<path fill="none" stroke="blue" stroke-width="2" d="M233.397,150 a100,50 150 1 1 0.5,0.866 z"/>
+</svg>

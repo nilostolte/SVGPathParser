@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -2 200 204">
+<path fill="none" stroke="#55aa00" stroke-width="2" d="M200,100 a100,50 0 1 1 0,-1 z"/>
+<path fill="none" stroke="green" stroke-width="2" d="M186.603,150 a100,50 30 1 1 0.5,-0.866 z"/>
+<path fill="none" stroke="#aa5500" stroke-width="2" d="M150,186.603 a100,50 60 1 1 0.866,-0.5 z"/>
+<path fill="none" stroke="red" stroke-width="2" d="M100,200 a100,50 90 1 1 1,0 z"/>
+<path fill="none" stroke="#aa0055" stroke-width="2" d="M50,186.603 a100,50 120 1 1 0.866,0.5 z"/>
+<path fill="none" stroke="blue" stroke-width="2" d="M13.397,150 a100,50 150 1 1 0.5,0.866 z"/>
+</svg>
