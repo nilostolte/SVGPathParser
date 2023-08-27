@@ -26,6 +26,6 @@ The following commands can be also included in the same line separated by spaces
 |**`-e`**| string<sup>**</sup> | commands to be included at the end of the path | `-pz` |
 |**`-a`**| number | the rotation angle in degrees (can be supplied instead of a matrix) | `-a12.5` |
 
-<b>*   </b> a string with only one word can appear without quotes<br>
-<b>** </b> a string with only one attribute with no white spaces can appear without quotes
+<b>*   </b> a string with only one attribute with no white spaces can appear without quotes<br>
+<b>** </b> a string with only one word can appear without quotes
 
