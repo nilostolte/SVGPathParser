@@ -21,9 +21,11 @@ The following commands can be also included in the same line separated by spaces
 | Command | Parameter | Description | <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Example<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> |
 |-| - | - | - |
 |**`-r`**| none | generates a path with relative coordinates | `-r` |
-|**`-m`**| matrix | transformation matrix with 6 elements inside a string | `-m"1 0 0 1 100 100"` |
-|**`-p`**| string | attributes to be included in the path such as color, stroke-width, etc.| `-p"stroke=\"#DB362D\" fill=\"none\""` |
-|**`-e`**| string<sup>*</sup> | commands to be included at the end of the path | `-pz` |
+|**`-m`**| matrix | transformation matrix with 6 elements separated by spaces inside a string | `-m"1 0 0 1 100 100"` |
+|**`-p`**| string<sup>*</sup> | attributes to be included in the path such as color, stroke-width, etc.| `-p"stroke=\"#DB362D\" fill=\"none\""` |
+|**`-e`**| string<sup>**</sup> | commands to be included at the end of the path | `-pz` |
 |**`-a`**| number | the rotation angle in degrees (can be supplied instead of a matrix) | `-a12.5` |
 
-<b>*</b> a string with only one word can appear without quotes
+<b>*   </b> a string with only one word can appear without quotes<br>
+<b>** </b> a string with only one word can appear without quotes
+
