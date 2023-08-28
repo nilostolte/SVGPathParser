@@ -11,7 +11,7 @@ Note that in the relative coordinates mode the first path command is always an "
 
 The source code generates traces when DEBUG is defined. It also generates numbers in full float precision when VERBOSE is defined, otherwise all results are truncated to a maximum of 3 dgits after the decimal point.
 
-## Application parameters
+### Application parameters
 The only compulsory parameter for the application is the path to be parsed. It must appear between quotes and separated by spaces from the program executable name or from the other program paramenters. For example, supposing the executable "a.exe" called from a shell window, the program can be called like this:
 
 ```
