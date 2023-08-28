@@ -56,7 +56,7 @@ The Windows batch files use some conventions that are specific to them. The exam
 
 ### Example 1: [NASA Logo](https://github.com/nilostolte/SVGPathParser/blob/main/src/NASA)
 <p align="center">
-    <img src="https://github.com/nilostolte/SVGPathParser/blob/main/src/NASA/NASA-relative.svg" width="500">
+    <img src="https://github.com/nilostolte/SVGPathParser/blob/main/src/NASA/NASA-relative.svg" width="509">
 </p>
 
 The NASA logo above is a good example on how to parse the original SVG that mixes absolute and relative coordinates, to generate a file that contains either only absolute coordinates or only relative coordinates (except for the initial "M" command which must be in absolute coordinates).
