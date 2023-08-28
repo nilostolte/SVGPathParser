@@ -9,7 +9,7 @@ The code (source code and compiled executable a.exe) implements an application t
 
 Note that in the relative coordinates mode the first path command is always an "M" which supplies the initial coordinates of the path in absolute coordinates. This allows the path to be placed at the coordinates declared there, whereas all the other elements of the path will follow flawlessly, since they are all in relative coordinates. Even if the first command in a path is "m" it will always be interpreted as an "M" commands according to [W3C SVG standard](https://www.w3.org/TR/SVG2/paths.html#PathDataMovetoCommands).
 
-The source code generates traces when DEBUG is defined. It also generates numbers in full float precision when VERBOSE is defined, otherwise all results are truncated to a maximum of 3 dgits after the decimal point.
+The source code generates traces when DEBUG is defined. It also generates numbers in full float precision when VERBOSE is defined, otherwise all results are truncated to a maximum of 3 digits after the decimal point.
 
 ### Application parameters
 The only compulsory parameter for the application is the path to be parsed. It must appear between quotes and separated by spaces from the program executable name or from the other program paramenters. For example, supposing the executable "a.exe" called from a shell window, the program can be called like this:
