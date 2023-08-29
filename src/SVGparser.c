@@ -99,23 +99,30 @@
 // macro to round and trucate at 3 digits after the decimal point 
 #define dig3(n) (roundf((n)*1000.0f)/1000.0f)
 
-
 #ifdef VERBOSE
 #define trnc(a) (a)
+char *M_format = "M%f,%f ";
 char *L_format = "L%f,%f ";
 char *H_format = "H%f ";
 char *V_format = "V%f ";
+char *m_format = "m%f,%f ";
 char *l_format = "l%f,%f ";
 char *h_format = "h%f ";
 char *v_format = "v%f ";
+char *pt_format = "%f,%f ";
+char *a_format = "%f,%f %f %f %f %f,%f ";
 #else
 #define trnc(a) dig3(a)
+char *M_format = "M%g,%g ";
 char *L_format = "L%g,%g ";
 char *H_format = "H%g ";
 char *V_format = "V%g ";
+char *m_format = "m%g,%g ";
 char *l_format = "l%g,%g ";
 char *h_format = "h%g ";
 char *v_format = "v%g ";
+char *pt_format = "%g,%g ";
+char *a_format = "%g,%g %g %g %g %g,%g ";
 #endif
 
 #define ITEM_SIZE 64
@@ -976,162 +983,88 @@ static void nsvg__parsePath(SVGPathparser* p, char*s)
 }
 
 //
-//  Prints an SVG path with absolute coordinates
-//    Input:  a linked list of SVG subpaths (SVGpath)
+//  Prints an SVG path with absolute or relative coordinates
+//    Input:  (1) a linked list of SVG subpaths (SVGpath)
+//            (2) a zero for relative coordinates or a 1 for absolute coordinates
 //    Output: prints the svg path on the console by using the internal path
 //            representation, and substuting linetos by hlinetos or vlinetos
 //            when appropriate.
 //
-static void generateAbsoluteSVG(SVGpath* path) {
-	SVGpath* p;
-	float* elements;
-	int size;
-	int i, j, nargs;
-	int32_t cmd;
-	float cpx, cpy, x, y;
-	for( p = path; p; p = p->next){
-		elements = p->elements;
-		size = p->size;
-#ifdef VERBOSE
-		printf("M%f,%f ", elements[0], elements[1]);
-		cpx = elements[0]; cpy = elements[1];
-#else
-		printf("M%g,%g ", dig3(elements[0]), dig3(elements[1]));
-		cpx = dig3(elements[0]); cpy = dig3(elements[1]);
-#endif
-		for (i = 2; i < size; ) {
-			cmd = *command(p->elements+i);
-			if (cmd == LINETO) {
-#ifdef VERBOSE
-				x = p->elements[i+1]; y = p->elements[i+2]);
-#else
-				x = dig3(p->elements[i+1]); y = dig3(p->elements[i+2]);
-#endif
-				if ( x == cpx ) {
-				   printf(V_format, y);
-				   cpy = y;
-				   i+=3;
-				   continue;
-				}
-				if ( y == cpy ) {
-				   printf(H_format, x);
-				   cpx = x;
-				   i+=3;
-				   continue;
-				}
-				printf(L_format, x, y);
-				cpx = x; cpy = y;
-				i+=3;
-				continue;
-			}
-			printf("%c", commands[cmd & 0xff]);
-			nargs = cmd >> 8;    // get number of argments from command code
-			if (nargs < 7) { // for every one except arcs
-#ifdef VERBOSE
-              for (j = 1; j < nargs; j += 2 )
-				 printf("%f,%f ", p->elements[i+j], p->elements[i+j+1]);
-              i += j;
-              cpx = p->elements[i-2]; cpy = p->elements[i-1];
-#else
-              for (j = 1; j < nargs; j += 2 )
-				 printf("%g,%g ", dig3(p->elements[i+j]),dig3(p->elements[i+j+1]));
-              i += j;
-              cpx = dig3(p->elements[i-2]); cpy = dig3(p->elements[i-1]);
-#endif				   		
-				continue;
-			}
-			// this is an arc
-#ifdef VERBOSE
-			printf("%f,%f %f %f %f %f,%f ", 
-				p->elements[i+1], p->elements[i+2], p->elements[i+3], p->elements[i+4], 
-				p->elements[i+5], p->elements[i+6], p->elements[i+7]
-			);
-			cpx = p->elements[i+6]; cpy = p->elements[i+7];
-#else
-			printf("%g,%g %g %g %g %g,%g ", 
-				dig3(p->elements[i+1]), dig3(p->elements[i+2]), dig3(p->elements[i+3]), 
-				dig3(p->elements[i+4]), dig3(p->elements[i+5]), dig3(p->elements[i+6]), 
-				dig3(p->elements[i+7])
-			);
-			cpx = dig3(p->elements[i+6]); cpy = dig3(p->elements[i+7]);
-#endif		
-			i += 8;			
-		}
-	}
-}
 
-static void generateRelativeSVG(SVGpath* path) {
+static void generateSVG(SVGpath* path, int absolute) {
 	SVGpath* p;
 	float* elements;
 	int size;
 	int i, j, nargs;
 	int32_t cmd;
 	float cpx, cpy, x, y;
+	char *format = M_format;
 	for( p = path; p; p = p->next){
 		elements = p->elements;
 		size = p->size;
-#ifdef VERBOSE
-		printf("M%f,%f ", elements[0], elements[1]);
-#else
-		printf("M%g,%g ", dig3(elements[0]), dig3(elements[1]));
-#endif
+		if ( absolute ) printf(format, trnc(elements[0]), trnc(elements[1]));
+		else {
+			if ( format == M_format ) {
+				printf(format, trnc(elements[0]), trnc(elements[1]));
+				format = m_format; //next movetos in subpaths are relative
+			}
+			else printf(format, trnc(elements[0]-cpx), trnc(elements[1]-cpy));
+		}
         cpx = elements[0]; cpy = elements[1];
 		for (i = 2; i < size; ) {
 			cmd = *command(p->elements+i);
 			if (cmd == LINETO) {
 				x = p->elements[i+1]; y = p->elements[i+2];
-				if ( x == cpx ) {
-					if ( y != cpy) {
-					    printf(v_format, trnc(y - cpy));
+				if ( trnc(x) == trnc(cpx) ) {
+					if ( trnc(y) != trnc(cpy)) {
+						if ( absolute ) printf(V_format, trnc(y));
+					    else printf(v_format, trnc(y - cpy));
 				        cpy = y;
 					}
 				   i+=3;
 				   continue;
 				}
-				if ( y == cpy ) {
-					if ( x != cpx ) {
-						printf(h_format, trnc(x - cpx));
-						cpx = x;
-					}
+				if ( trnc(y) == trnc(cpy) ) {
+                   // trnc(x) != trnc(cpx), otherwise we wouldn't be here
+                   if ( absolute ) printf(H_format, trnc(x));
+                   else printf(h_format, trnc(x - cpx));
+                   cpx = x;
 				   i+=3;
 				   continue;
 				}
-				printf(l_format, trnc(x - cpx), trnc(y - cpy));
+				if ( absolute ) printf(L_format, trnc(x), trnc(y));
+				else printf(l_format, trnc(x - cpx), trnc(y - cpy));
 				cpx = x; cpy = y;
 				i+=3;
 				continue;
 			}
-			printf("%c", relative[cmd & 0xff]);
+			printf("%c", (( absolute ) ? commands[cmd & 0xff] : relative[cmd & 0xff]));
 			nargs = cmd >> 8;    // get number of argments from command code
 			if (nargs < 7) { // for every one except arcs
-#ifdef VERBOSE
-              for (j = 1; j < nargs; j += 2 )
-				 printf("%f,%f ", p->elements[i+j] - cpx, p->elements[i+j+1] - cpy);
+			  if ( absolute )
+                for (j = 1; j < nargs; j += 2 )
+				   printf(pt_format, trnc(p->elements[i+j]), trnc(p->elements[i+j+1]));
+			  else
+				for (j = 1; j < nargs; j += 2 )
+				   printf(pt_format, trnc(p->elements[i+j] - cpx), trnc(p->elements[i+j+1] - cpy));
               i += j;
               cpx = p->elements[i-2]; cpy = p->elements[i-1];
-#else
-              for (j = 1; j < nargs; j += 2 )
-				 printf("%g,%g ", dig3(p->elements[i+j] - cpx),dig3(p->elements[i+j+1] - cpy));
-              i += j;
-              cpx = dig3(p->elements[i-2]); cpy = dig3(p->elements[i-1]);
-#endif				   		
-				continue;
+			  continue;
 			}
 			// this is an arc
-#ifdef VERBOSE
-			printf("%f,%f %f %f %f %f,%f ", 
-				p->elements[i+1], p->elements[i+2], p->elements[i+3], p->elements[i+4], 
-				p->elements[i+5], p->elements[i+6] - cpx, p->elements[i+7] - cpy
-			);
-			cpx = p->elements[i+6]; cpy = p->elements[i+7];
-#else
-			printf("%g,%g %g %g %g %g,%g ", 
-				dig3(p->elements[i+1]), dig3(p->elements[i+2]), dig3(p->elements[i+3]), 
-				dig3(p->elements[i+4]), dig3(p->elements[i+5]), dig3(p->elements[i+6] - cpx), 
-				dig3(p->elements[i+7] - cpy)
-			);
-			cpx = dig3(p->elements[i+6]); cpy = dig3(p->elements[i+7]);
-#endif		
+			if ( absolute )
+				printf(a_format, 
+					trnc(p->elements[i+1]), trnc(p->elements[i+2]), // radii
+					trnc(p->elements[i+3]), trnc(p->elements[i+4]), trnc(p->elements[i+5]), 
+					trnc(p->elements[i+6]), trnc(p->elements[i+7]) // last coordinates
+				);				
+			else
+				printf(a_format, 
+					trnc(p->elements[i+1]), trnc(p->elements[i+2]), // radii
+					trnc(p->elements[i+3]), trnc(p->elements[i+4]), trnc(p->elements[i+5]), // angle, etc.
+					trnc(p->elements[i+6] - cpx), trnc(p->elements[i+7] - cpy) // last coordinates
+				);
+			cpx = p->elements[i+6]; cpy = p->elements[i+7];		
 			i += 8;			
 		}
 	}
@@ -1242,8 +1175,7 @@ int main(int argc, char *argv[]) {
 #endif
 	if  (!pars) printf("<path d=\"");
 	else  printf("<path %s d=\"", pars);
-	if (absolute) generateAbsoluteSVG(p->plist);
-	else generateRelativeSVG(p->plist);
+	generateSVG(p->plist,absolute);
 	if (!end) printf("\"/>\n");
 	else printf("%s\"/>\n", end);
 #ifdef DEBUG
