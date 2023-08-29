@@ -5,22 +5,28 @@ A compact parser for SVG path shape definitions. It allows to generate the same 
 While NanoSVG parser generates only cubic Bezier curves, the new parser stores the path with SVG's original commands and points as much as possible. The only difficulty was with HLINETO and VLINETO single coordinate commands that had to be substituted by LINETO commands in order to allow rotations. Since the matrix is systematically applied to all shapes, two coordinates are necessary to allow the calculation. Another difficulty was with ARCTO commands which also requires storing the angle of the rotation besides the matrix.
 
 ## SVG generation
-The code (source code and compiled executable a.exe) implements an application that needs inline input arguments to be executed correctly. According to the parameters supplied, it will print on the console a complete SVG path command, either in absolute coordinates or in relative coordinates (using "-r" - see [below](https://github.com/nilostolte/SVGPathParser/tree/main#application-parameters)). The SVG generated is optimized substituting "l" or "L" commands by "h", "H", "V" or "v" commands when appropriate, and further optimized when either of these commands would not change the current point (as for example, "h0" or "v0"). In this case they are ignored, since they are equivalent to no operations.
+The code (source code and compiled executable a.exe) implements an application that needs inline input arguments to be executed correctly. According to the parameters supplied, it will print on the console a complete SVG path command, either in absolute coordinates or in relative coordinates (using "-r" - see [below](https://github.com/nilostolte/SVGPathParser/tree/main#application-parameters)). The SVG generated is optimized substituting "l" or "L" commands by "h", "H", "V" or "v" commands when appropriate, and further optimized when either of these commands would not change the current point (as for example, "h0" or "v0"). In this case they are ignored, since they are equivalent to no operations. The program also eliminates spaces between commands, since this allows to save space.
 
-Note that in the relative coordinates mode the first path command is always an "M" which supplies the initial coordinates of the path in absolute coordinates. This allows the path to be placed at the coordinates declared there, whereas all the other elements of the path will follow flawlessly, since they are all in relative coordinates. Even if the first command in a path is "m" it will always be interpreted as an "M" commands according to [W3C SVG standard](https://www.w3.org/TR/SVG2/paths.html#PathDataMovetoCommands).
+Notice that in the relative coordinates mode the first path command is always an "M" which supplies the initial coordinates of the path in absolute coordinates. This allows the path to be placed at the coordinates declared there, whereas all the other elements of the path will follow flawlessly, since they are all in relative coordinates. Even if the first command in a path is "m" it will always be interpreted as an "M" commands according to [W3C SVG standard](https://www.w3.org/TR/SVG2/paths.html#PathDataMovetoCommands).
 
 The source code generates traces when DEBUG is defined. It also generates numbers in full float precision when VERBOSE is defined, otherwise all results are truncated to a maximum of 3 digits after the decimal point.
 
 ### Application parameters
-The only compulsory parameter for the application is the path to be parsed. It must appear between quotes and separated by spaces from the program executable name or from the other program parameters. For example, supposing the executable "a.exe" called from a shell window, the program can be called like this:
+The only compulsory parameter for the application is the "d" attribute of a path that is to be parsed. This attribute completely describes the shape of the path without the need of other atributes. It must appear between quotes and separated by spaces from the program executable name or from the other program parameters. If no other parameters are given, the path to be parsed is converted to absolute coordinates and shown in the shell window. For example, supposing the executable "a.exe" called from a shell window, the program can be called like this:
 
 ```
-    ./a "M 100 0 A 100 50 0 1 1 100 -1"
+    ./a "M100,0 a100,50 0 1 1 0,-1 "
 ```
 
-Notice that one can drop the "./" prefix when calling from a batch file. Also notice that "a.exe" is the standard ouput of C/C++ compilers, when the executable is not explicitly named. One could name it in a more appropriate way, but for the sake of simplicity, only the source code has a proper name, while the executable, being unique in the directory containing it, is implictly refering to that source code, since it is also unique in the directory.
+The program will display in the next line the same path in absolute coordinates:
 
-The following commands can be also included in the same line of the program call, all separated by spaces from one another:
+```
+<path d="M100,0A100,50 0 1 1 100,-1"/>
+```
+
+Since only the "d" attribute of the path is passed as a parameter here, the program only adds the path tag, besides converting the path to absolute coordinates as shown. To add more path attributes besides "d" one can use the "-p" command explained below. Notice that one can drop the "./" prefix when calling from a batch file. Also notice that "a.exe" is the standard ouput of C/C++ compilers, when the executable is not explicitly named. One could name it in a more appropriate way, but for the sake of simplicity, only the source code has a proper name, while the executable, being unique in the directory containing it, is implictly refering to that source code, since it is also unique in the directory.
+
+A summary of the commands that can be in the same line of the program call, all separated by spaces from one another, are shown in the table below:
 
 | Command | Parameter | Description | <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Example<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> |
 |-| - | - | - |
@@ -40,10 +46,6 @@ One should read the batch files to check how the examples are generated (please 
 
 One could include the `<svg>` tags using the batch files as well, but for the sake of simplicity one is assumed to just copy-paste these tags in an empty file and copy-paste between them the resulting converted paths output by a batch file. This is such a trivial task that it probably doesn't worth automatizing. Also, proceeding in this way one can easily paste the resulting SVG file paths into another SVG file directly.
 
-Also of note, the viewport attribute of the `<svg>` tag is entirely the user's resposibility. The reasoning behind this is simplicity and compatibility with other vector formats and languages where the bounding box is rarely calculated automatically. In any case, the interested user can obtain the bounding box of a path by converting the path to a succession of cubic Bezier curves using the appropriate functions given in the original [parser](https://raw.githubusercontent.com/memononen/nanosvg/master/src/nanosvg.h).
-
-The goal of this parser is to be simple and to faithfully reproduce the original path. To transform the path into cubic Bezier curves is a completely different task and it cannot be considered as part of the parser as has been originally done. The decision to code these convertions was probably to simplify the representation in order to display them. However, this simplification requires quite long and complex functions which would contribute very little to the tasks addressed here.
-
 ### Reading Windows batch files
 The Windows batch files use some conventions that are specific to them. The examples cannot be entirely understood without reading these batch files. Programmers and users coming from other platforms will be able to understand them by using the following table of common expressions used in them:
 
@@ -51,6 +53,25 @@ The Windows batch files use some conventions that are specific to them. The exam
 | - | - |
 |**@echo off**| command that says the commands executed by the batch file are not going to be shown, including this command (because it's preceded by a "@") |
 |**%~dp0..\a**| "%~dp0" indicates the current directory in which the batch file is located. "..\a" following "%~dp0" means to call executable "a.exe" in the parent of the current directory |
+
+### Assembling an SVG and using viewport
+ The viewport is an essencial part of SVG graphics because it defines the bounding box of all the shapes between `<svg>` and `<\svg>`. Some SVG viewers require the viewport in order to display the SVG contents and the contents can be cut or be invisible if the viewport is incorrect.
+
+ This is how an SVG with a viewport is defined:
+
+```SVG
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 130">
+<!-- the paths are to be inserted here -->
+</svg>
+```
+This viewport indicates that the SVG is to be viewed into a rectangle between point (0,0) and (230,130). Supposing the following graphics, this viewport is defined by the rectangle:
+
+<p align="center">
+    <img src="https://github.com/nilostolte/SVGPathParser/blob/main/viewport.svg" width="400">
+</p>
+
+The viewport attribute of the `<svg>` tag is entirely the user's resposibility, mainly because one is supposed to add elements by hand into the SVG at will. Therefore, only the user will know what will be the boundding box enveloping all the elements in an svg manipulated in this way. This is also simpler and more compatible with other vector formats and languages where the bounding box is rarely calculated automatically.
+
 
 ## Examples
 
