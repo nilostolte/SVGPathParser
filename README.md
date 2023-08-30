@@ -44,7 +44,17 @@ Since it is cumbersome to type commands each time one calls a program in a shell
 ### Generating the SVG files with batch files
 One should read the batch files to check how the examples are generated (please read the next section in order to decode some common expressions used in these batch files). Since the "echo" is off one will only see the resulting paths one after the other being displayed in the shell window. These paths can then be copied and pasted in a file containing already a standard SVG file header (`<svg>` tag at the start and `</svg>` tag at the end) and use it as an empty frame like in the examples below.
 
-One could include the `<svg>` tags using the batch files as well, but for the sake of simplicity one is assumed to just copy-paste these tags in an empty file and copy-paste between them the resulting converted paths output by a batch file. This is such a trivial task that it probably doesn't worth automatizing. Also, proceeding in this way one can easily paste the resulting SVG file paths into another SVG file directly.
+#### Using _bash_ scripts on Windows or Linux
+Another possibility for contructing batch files is using [w64devkit](https://github.com/skeeto/w64devkit/releases) _bash_ scripts. To be able to run _bash_ scripts with w64devkit, the most innocuous way (don't use w64devkit.exe) is following these steps:
+
+1. Open a Windows command window, not a Powershell: right-click at `Start`, then click `Run`, type `cmd.exe` and click `OK` or press `Enter`.
+2. Transform the Windows command window into a Linux command window: type `sh-l` and press `Enter`
+3. Go to the directory where your bash script is: copy the location from the explorer window, type `cd` followed by a blank space, type `"`, right-click the command window header, choose `Edit > Paste` (Control-V doesn't work), type `"` again and press `Enter`.
+4. Type the name of the bash and press `Enter`.
+
+Steps 1 to 3 initialize any Windows command window to use any Linux commands with w64devkit. Many commands work on Powershell as well, as for example calling the `gcc` compiler, but not _bash_.
+
+The advantage of using _bash_ is that the scripts can also be used on Linux platforms.  
 
 ### Reading Windows batch files
 The Windows batch files use some conventions that are specific to them. The examples cannot be entirely understood without reading these batch files. Programmers and users coming from other platforms will be able to understand them by using the following table of common expressions used in them:
