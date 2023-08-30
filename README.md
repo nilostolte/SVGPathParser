@@ -7,7 +7,7 @@ While NanoSVG parser generates only cubic Bezier curves, the new parser stores t
 ## SVG generation
 The code (source code and compiled executable a.exe) implements an application that needs inline input arguments to be executed correctly. According to the parameters supplied, it will print on the console a complete SVG path command, either in absolute coordinates or in relative coordinates (using "-r" - see [below](https://github.com/nilostolte/SVGPathParser/tree/main#application-parameters)). The SVG generated is optimized substituting "l" or "L" commands by "h", "H", "V" or "v" commands when appropriate, and further optimized when either of these commands would not change the current point (as for example, "h0" or "v0"). In this case they are ignored, since they are equivalent to no operations. The program also eliminates spaces between commands, since this allows to save space.
 
-Notice that in the relative coordinates mode the first path command is always an "M" which supplies the initial coordinates of the path in absolute coordinates. This allows the path to be placed at the coordinates declared there, whereas all the other elements of the path will follow flawlessly, since they are all in relative coordinates. Even if the first command in a path is "m" it will always be interpreted as an "M" commands according to [W3C SVG standard](https://www.w3.org/TR/SVG2/paths.html#PathDataMovetoCommands).
+Notice that in the relative coordinates mode the first path command is always an "M" which supplies the initial coordinates of the path in absolute coordinates. This allows the path to be placed at the coordinates declared there, whereas all the other elements of the path will follow flawlessly, since they are all in relative coordinates. Even if the first command in a path is "m" it will always be interpreted as an "M" command according to [W3C SVG standard](https://www.w3.org/TR/SVG2/paths.html#PathDataMovetoCommands).
 
 The source code generates traces when DEBUG is defined. It also generates numbers in full float precision when VERBOSE is defined, otherwise all results are truncated to a maximum of 3 digits after the decimal point.
 
@@ -24,7 +24,7 @@ The program will display in the next line the same path in absolute coordinates:
 <path d="M100,0A100,50 0 1 1 100,-1"/>
 ```
 
-Since only the "d" attribute of the path is passed as a parameter here, the program only adds the path tag, besides converting the path to absolute coordinates as shown. To add more path attributes besides "d" one can use the "-p" command explained below. Notice that one can drop the "./" prefix when calling from a batch file. Also notice that "a.exe" is the standard ouput of C/C++ compilers, when the executable is not explicitly named. One could name it in a more appropriate way, but for the sake of simplicity, only the source code has a proper name, while the executable, being unique in the directory containing it, is implictly refering to that source code, since it is also unique in the directory.
+Since only the "d" attribute of the path is passed as a parameter here, the program only adds the path tag, besides converting the path to absolute coordinates as shown. To add more path attributes besides "d" one can use the "-p" command explained below. Notice that one can drop the "./" prefix when calling from a batch file. Also notice that "a.exe" is the standard ouput of C/C++ compilers, when the executable is not explicitly named. For the sake of simplicity and since the source and the executable files are both unique in the directory containing them, "a.exe" is implictly refering to the source file "SVGparser.c".
 
 A summary of the commands that can be in the same line of the program call, all separated by spaces from one another, are shown in the table below:
 
@@ -64,13 +64,13 @@ The Windows batch files use some conventions that are specific to them. The exam
 <!-- the paths are to be inserted here -->
 </svg>
 ```
-This viewport indicates that the SVG is to be viewed into a rectangle between point (0,0) and (230,130). Supposing the following graphics, this viewport is defined by the rectangle:
+This viewport indicates that the SVG is to be viewed into a rectangle between points (0,0) and (230,130). Supposing the following graphics, this viewport is defined by the rectangle:
 
 <p align="center">
     <img src="https://github.com/nilostolte/SVGPathParser/blob/main/viewport.svg" width="400">
 </p>
 
-The viewport attribute of the `<svg>` tag is entirely the user's resposibility, mainly because one is supposed to add elements by hand into the SVG at will. Therefore, only the user will know what will be the boundding box enveloping all the elements in an svg manipulated in this way. This is also simpler and more compatible with other vector formats and languages where the bounding box is rarely calculated automatically.
+The viewport attribute of the `<svg>` tag is entirely the user's resposibility, mainly because one is supposed to add elements by hand into the SVG at will. Therefore, only the user will know what will be the bounding box enveloping all the elements in an svg manipulated in this way. This is also simpler and more compatible with other vector formats and languages where the bounding box is rarely calculated automatically.
 
 
 ## Examples
@@ -103,7 +103,7 @@ This is a another use of the parser: to use relative coordinates to simplify pat
     <img src="https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse46.svg" width="500">
 </p>
 
-The ellipse is probably one of the most particular path commands in SVG and this example was required to test "A" or "a" commands in the parser to be used to draw rotated ellipses. On the other hand, rotated SVG ellipses are easier to be generated by on the fly by _ad hoc_ functions in JavaScript. An experienced JavaScript programmer could produce the same paths on the fly and then use inspect to copy the SVG paths generated. The purpose of this example is to demonstrate an alternative way to generate rotated static SVG ellipses without the need of programming using an initial trivial ellipse centered at the origin defined in absolute coordinates aligned with both axes, and to use transformation matrices to rotate it and to translate it elsewhere.
+The ellipse is probably one of the most particular path commands in SVG and this example was required to test "A" or "a" commands in the parser to be used to draw rotated ellipses. On the other hand, rotated SVG ellipses are easier to be generated on the fly by using _ad hoc_ functions in JavaScript. An experienced JavaScript programmer could produce the same paths on the fly and then use inspect to copy the SVG paths generated. The purpose of this example is to demonstrate an alternative way to generate rotated static SVG ellipses without the need of programming using an initial trivial ellipse centered at the origin defined in absolute coordinates aligned with both axes, and to use transformation matrices to rotate it and to translate it to the desired point.
 
 The [ellipses](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses) directory within this repository include two simpler examples and a more complex one containing both examples in the same svg file (the image above is a rendering of the file mentioned here that shows both examples side by side).
 
@@ -122,7 +122,7 @@ The batch file requires all four ellipses to be generated in relative coordinate
 "M 100 0 A 100 50 0 1 1 100 -1"
 ```
 
-Notice that this path is not closed. This is done because ellipses in SVG cannot be closed, since the initial and end point must be different. One could have used the "z" command in the original ellipse to close it, but here the "-ez" command is used to close each ellipse. By removing this command the gap between the start point and the end point shows how angles grow in SVG. They do it in a clockwise manner because the y axis is inverted since it always points down. The produced paths give the following pattern:
+Notice that this path is not closed. This is done because ellipses and circles inside SVG paths cannot be closed, since the initial and end point must be different. One could have used the "z" command in the original ellipse to close it, but here the "-ez" command is used to close each ellipse. By removing this command the gap between the start point and the end point shows how angles grow in SVG. They do it in a clockwise manner because the y axis is inverted since it always points down. The produced paths give the following pattern:
 
 <p align="center">
 <img src="https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse4.svg" width="250">
