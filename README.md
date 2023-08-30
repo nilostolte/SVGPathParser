@@ -42,22 +42,22 @@ A summary of the commands that can be in the same line of the program call, all 
 Since it is cumbersome to type commands each time one calls a program in a shell window, it is recommended to call the program using batch files. It is possible to generate entire SVG files only using batch files and calling the application from it, as illustrated in the following examples.
 
 ### Generating the SVG files with batch files
-One should read the batch files to check how the examples are generated (please read the next section in order to decode some common expressions used in these batch files). Since the "echo" is off one will only see the resulting paths one after the other being displayed in the shell window. These paths can then be copied and pasted in a file containing already a standard SVG file header (`<svg>` tag at the start and `</svg>` tag at the end) and use it as an empty frame like in the examples below.
+One should read the batch (or the _bash_ scripts) files to check how the examples are generated. By running any of the batch files one will see the resulting paths one after the other being displayed in the shell window. These paths can then be copied and pasted in a file containing already a standard SVG file header (`<svg>` tag at the start and `</svg>` tag at the end) and use it as an empty frame like in the [examples](https://github.com/nilostolte/SVGPathParser#examples). See how to create an SVG file header and how to set a viewport [below](https://github.com/nilostolte/SVGPathParser#assembling-an-svg-and-using-viewport).
 
-#### Using _bash_ scripts on Windows or Linux
-Another possibility for contructing batch files is using [w64devkit](https://github.com/skeeto/w64devkit/releases) _bash_ scripts. To be able to run _bash_ scripts with w64devkit, the most innocuous way (don't use w64devkit.exe) is following these steps:
+#### Using the _bash_ scripts with w64devkit (Windows)
+One possibility for contructing batch files is using [w64devkit](https://github.com/skeeto/w64devkit/releases) _bash_ scripts. These scripts are supplied in this repository. They have the suffix `.sh` after their names and have `#!/bin/bash` in their first line. These scripts are prefered instead of Windows batch files because they are easier to understand and because they can also be used on **Linux** platforms. The only inconvenient in running them on Windows is that they cannot run in standard Windows command windows without some previous preparation. To be able to run _bash_ scripts with w64devkit, the most innocuous way (w64devkit.exe is not advised) is following these steps:
 
 1. Open a Windows command window, not a Powershell: right-click at `Start`, then click `Run`, type `cmd.exe` and click `OK` or press `Enter`.
-2. Transform the Windows command window into a Linux command window: type `sh-l` and press `Enter`
+2. Transform the Windows command window into a Linux command window: type `sh -l` and press `Enter`
 3. Go to the directory where your bash script is: copy the location from the explorer window, type `cd` followed by a blank space, type `"`, right-click the command window header, choose `Edit > Paste` (Control-V doesn't work), type `"` again and press `Enter`.
 4. Type the name of the bash and press `Enter`.
 
 Steps 1 to 3 initialize any Windows command window to use any Linux commands with w64devkit. Many commands work on Powershell as well, as for example calling the `gcc` compiler, but not _bash_.
 
-The advantage of using _bash_ is that the scripts can also be used on Linux platforms.  
+Once the _bash_ scripts are run, the content can be copied by just selecting and pressing `Enter`.
 
-### Reading Windows batch files
-The Windows batch files use some conventions that are specific to them. The examples cannot be entirely understood without reading these batch files. Programmers and users coming from other platforms will be able to understand them by using the following table of common expressions used in them:
+#### Reading Windows batch files
+The Windows batch files use some conventions that are specific to them. A table of common expressions used in Windows batch files is shown below
 
 | Batch<span>&nbsp;</span>expression | Description | 
 | - | - |
@@ -99,10 +99,12 @@ The [NASA](https://github.com/nilostolte/SVGPathParser/blob/main/src/NASA) direc
 | <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Filename<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> | Description | 
 | - | - |
 |**NASA_logo.svg**| the original NASA logo in SVG |
-|**NASA-absolute.svg**| the NASA logo converted to absolute coordinates using **NASAa.bat** |
-|**NASA-relative.svg**| the NASA logo converted to relative coordinates using **NASA.bat** |
+|**NASA-absolute.svg**| the NASA logo converted to absolute coordinates using **NASAa.bat** or **NASAa.sh** |
+|**NASA-relative.svg**| the NASA logo converted to relative coordinates using **NASA.bat** or **NASAa.sh**|
 |**NASAa.bat**| Windows batch file that reuses each path of the original NASA SVG logo and that generates them in absolute coordinates |
 |**NASA.bat**| Windows batch file that reuses each path of the original NASA SVG logo and that generates them in relative coordinates |
+|**NASAa.sh**| _bash_ script producing the same result as **NASAa.bat**   |
+|**NASA.sh**| _bash_ script producing the same result as **NASA.bat**   |
 
 The batch files contain the three paths in the original SVG passed as parameters to the parser, except for small changes. The most notable is that the third path in the original file becomes the second path in the batch files. This is because this path corresponds to second and third letters of the logo, and they should appear right after the first path, not as the last one as in the original file. Another change was made in few coordinates to avoid the generation of useless commands. This corrections were made by observing the initial coordinates generated by the parser in relative coordinates. 
 
