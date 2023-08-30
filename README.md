@@ -128,7 +128,17 @@ The first simple example generates [4 ellipses](https://github.com/nilostolte/SV
 %~dp0..\a -r -p"fill=\"none\" stroke=\"blue\" stroke-width=\"2\"" -ez -m"0 1 -1 0 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
 %~dp0..\a -r -p"fill=\"none\" stroke=\"magenta\" stroke-width=\"2\"" -ez -m"-.70710678 .70710678 -0.70710678 -.70710678 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
 ```
-The batch file requires all four ellipses to be generated in relative coordinates ("-r"), with no fill, stroke width of 2, and each one with a different color ("-p"). Notice that the initial ellipse path is always the same and given in absolute coordinates. The ellipse is centered at the origin with initial point at (100, 0), end point at (100, -1), with x axis radius of 100, y axis radius of 50, and a zero degrees angle:
+
+Or the [ellipse4.sh](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse4.sh) script:
+
+```shell
+#!/bin/bash
+../a -r -p"fill=\"none\" stroke=\"red\" stroke-width=\"2\"" -ez -m"1 0 0 1 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
+../a -r -p"fill=\"none\" stroke=\"green\" stroke-width=\"2\"" -ez -m".70710678 .70710678 -0.70710678 .70710678 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
+../a -r -p"fill=\"none\" stroke=\"blue\" stroke-width=\"2\"" -ez -m"0 1 -1 0 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
+../a -r -p"fill=\"none\" stroke=\"magenta\" stroke-width=\"2\"" -ez -m"-.70710678 .70710678 -0.70710678 -.70710678 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
+```
+The batch and script files force all four ellipses to be generated in relative coordinates ("-r"), with no fill, stroke width of 2, and each one with a different color ("-p"). Notice that the initial ellipse path is always the same and given in absolute coordinates. The ellipse is centered at the origin with initial point at (100, 0), end point at (100, -1), with x axis radius of 100, y axis radius of 50, and a zero degrees angle:
 
 ```svg
 "M 100 0 A 100 50 0 1 1 100 -1"
@@ -144,10 +154,10 @@ This example allows to easily understand the use of matrices to produce rotation
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 204 204">
-<path fill="none" stroke="red" stroke-width="2" d="M200,100 a100,50 0 1 1 0,-1 z"/>
-<path fill="none" stroke="green" stroke-width="2" d="M170.711,170.711 a100,50 45 1 1 0.707,-0.707 z"/>
-<path fill="none" stroke="blue" stroke-width="2" d="M100,200 a100,50 90 1 1 1,0 z"/>
-<path fill="none" stroke="magenta" stroke-width="2" d="M29.289,170.711 a100,50 135 1 1 0.707,0.707 z"/>
+<path fill="none" stroke="red" stroke-width="2" d="M200,100a100,50 0 1 1 0,-1z"/>
+<path fill="none" stroke="green" stroke-width="2" d="M170.711,170.711a100,50 45 1 1 0.707,-0.707z"/>
+<path fill="none" stroke="blue" stroke-width="2" d="M100,200a100,50 90 1 1 1,0z"/>
+<path fill="none" stroke="magenta" stroke-width="2" d="M29.289,170.711a100,50 135 1 1 0.707,0.707z"/>
 </svg>
 ```
 
@@ -157,4 +167,4 @@ The second simple example generates [6 ellipses](https://github.com/nilostolte/S
 <img src="https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse6.svg" width="250">
 </p>
 
-The more complex example combine both simpler examples above together in a single [svg file](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse46.svg). One uses [ellipse46.bat](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse46.bat) to generate the paths. The result was shown above in the rendering of two examples side by side.
+The more complex example combine both simpler examples above together in a single [svg file](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse46.svg). One uses [ellipse46.bat](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse46.bat) or [ellipse6.sh](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse6.sh) to generate the paths. The result was shown [above](https://github.com/nilostolte/SVGPathParser/tree/main#example-2-rotated-ellipses).
