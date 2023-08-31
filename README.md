@@ -100,7 +100,7 @@ The [NASA](https://github.com/nilostolte/SVGPathParser/blob/main/src/NASA) direc
 | - | - |
 |**NASA_logo.svg**| the original NASA logo in SVG |
 |**NASA-absolute.svg**| the NASA logo converted to absolute coordinates using **NASAa.bat** or **NASAa.sh** |
-|**NASA-relative.svg**| the NASA logo converted to relative coordinates using **NASA.bat** or **NASAa.sh**|
+|**NASA-relative.svg**| the NASA logo converted to relative coordinates using **NASA.bat** or **NASA.sh**|
 |**NASAa.bat**| Windows batch file that reuses each path of the original NASA SVG logo and that generates them in absolute coordinates |
 |**NASA.bat**| Windows batch file that reuses each path of the original NASA SVG logo and that generates them in relative coordinates |
 |**NASAa.sh**| _bash_ script producing the same result as **NASAa.bat**   |
