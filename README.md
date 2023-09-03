@@ -5,7 +5,7 @@ The source code containing the new parser is complemented with a `main` function
 
 The resulting application can be helpful to designers or programmers willing to resuse the path in different contexts or to experienced web programmers to redesign the path by hand. It is possible, for example, to redesign the entire path only using integers. The path can be repositioned and/or have its scale changed and/or rotated (passing a matrix with "-m" argument) to mix with other paths defined in different scales. This kind of activity was only possible using vector graphics editors like Illustrator or Inkscape, but even in these applications the automatization of this kind of task is hard. Here it only requires using a batch or a script file. 
 
-The source code in itself shows how to use the parser programatically and allows to easily extract the parser to be used in other contexts. The main motivation that came into mind when rewriting this parser was the possibility to reuse it in transpilers, where a GUI defined in SVG can be translated to a specific language or library. Another possibility is to use batch or script files to generate the design for web applications and using a modified version of the program to convert the design to another language.
+The source code in itself shows how to use the parser programatically and allows to easily extract the parser to be used in other contexts. The main motivation that came into mind when rewriting this parser was the possibility to reuse it in transpilers, where a GUI defined in SVG can be translated to a specific language or library.
 
 ## Differences with NanoSVG parser
 While NanoSVG parser generates only cubic Bezier curves, the new parser stores the path with SVG's original commands and points as much as possible. The only difficulty was with HLINETO and VLINETO single coordinate commands that had to be substituted by LINETO commands in order to allow rotations. Since the matrix is systematically applied to all shapes, two coordinates are necessary to allow the calculation. Another difficulty was with ARCTO commands which also requires storing the angle of the rotation besides the matrix.
@@ -30,7 +30,7 @@ The program will display in the next line the same path in absolute coordinates:
 <path d="M100,0A100,50 0 1 1 100,-1"/>
 ```
 
-Since only the "d" attribute of the path is passed as a parameter here, the program only adds the path tag, besides converting the path to absolute coordinates as shown. To add more path attributes besides "d" one can use the "-p" command explained below. Notice that one can drop the "./" prefix when calling from a batch file. Also notice that "a.exe" is the standard ouput of C/C++ compilers, when the executable is not explicitly named. For the sake of simplicity and since the source and the executable files are both unique in the directory containing them, "a.exe" is implictly refering to the source file "SVGparser.c".
+Since only the "d" attribute of the path is passed as a parameter here, the program only adds the path tag, besides converting the path to absolute coordinates as shown. To add more path attributes besides "d" one can use the "-p" command explained below. Notice that one can drop the "./" prefix when calling from a batch file. Also notice that "a.exe" ("a.out" on Linux) is the standard ouput of C/C++ compilers, when the executable is not explicitly named. For the sake of simplicity and since the source and the executable files are both unique in the directory containing them, "a.exe" is implictly refering to the source file "SVGparser.c".
 
 A summary of the commands that can be in the same line of the program call, all separated by spaces from one another, are shown in the table below:
 
@@ -50,17 +50,40 @@ Since it is cumbersome to type commands each time one calls a program in a shell
 ### Generating the SVG files with batch files
 One should read the batch (or the _bash_ scripts) files to check how the examples are generated. By running any of the batch files one will see the resulting paths one after the other being displayed in the shell window. These paths can then be copied and pasted in a file containing already a standard SVG file header (`<svg>` tag at the start and `</svg>` tag at the end) and use it as an empty frame like in the [examples](https://github.com/nilostolte/SVGPathParser#examples). See how to create an SVG file header and how to set a viewport [below](https://github.com/nilostolte/SVGPathParser#assembling-an-svg-and-using-viewport).
 
-#### Using the _bash_ scripts with w64devkit (Windows)
-One possibility for contructing batch files is using [w64devkit](https://github.com/skeeto/w64devkit/releases) _bash_ scripts. These scripts are supplied in this repository. They have the suffix `.sh` after their names and have `#!/bin/bash` in their first line. These scripts are prefered instead of Windows batch files because they are easier to understand and because they can also be used on **Linux** platforms. The only inconvenient in running them on Windows is that they cannot run in standard Windows command windows without some previous preparation. To be able to run _bash_ scripts with w64devkit, the most innocuous way (w64devkit.exe is not advised) is following these steps:
+#### Compiling and using the _bash_ scripts with w64devkit (Windows)
+One possibility for contructing batch files is using [w64devkit](https://github.com/skeeto/w64devkit/releases) _bash_ scripts. These scripts are supplied in this repository. They have the suffix `.sh` after their names and have `#!/bin/bash` in their first line. These scripts are prefered instead of Windows batch files because they are easier to understand and because they can also be used on **Linux** platforms. The only inconvenient in running them on Windows is that they cannot run in standard Windows command terminals without some previous preparation. To be able to run _bash_ scripts with w64devkit, the most innocuous way (w64devkit.exe is not advised) is following these steps:
 
-1. Open a Windows command window, not a Powershell: right-click at `Start`, then click `Run`, type `cmd.exe` and click `OK` or press `Enter`.
-2. Transform the Windows command window into a Linux command window: type `sh -l` and press `Enter`
+1. Open a Windows command terminal, not a Powershell: right-click at `Start`, then click `Run`, type `cmd.exe` and click `OK` or press `Enter`.
+2. Transform the Windows command terminal into a Linux command window: type `sh -l` and press `Enter`
 3. Go to the directory where your bash script is: copy the location from the explorer window, type `cd` followed by a blank space, type `"`, right-click the command window header, choose `Edit > Paste` (Control-V doesn't work), type `"` again and press `Enter`.
 4. Type the name of the bash and press `Enter`.
 
-Steps 1 to 3 initialize any Windows command window to use any Linux commands with w64devkit. Many commands work on Powershell as well, as for example calling the `gcc` compiler, but not _bash_.
+Steps 1 to 3 initialize any Windows command terminal to use any Linux commands with w64devkit. Many commands work on Powershell as well, as for example calling the `gcc` compiler, but not _bash_.
 
+To compile on Windows with w64devkit one merely calls gcc:
+
+```batchfile
+gcc SVGparser.c
+```
+To run the _bash_ scripts to run the compiled program, one needs to go to the `NASA` and `ellipses` directories first. From those directories one simply calls the _bash_ scripts from there. For example, in `NASA` diectory:
+
+```batchfile
+./NASA.sh
+```
 Once the _bash_ scripts are run, the content can be copied by just selecting and pressing `Enter`.
+
+#### Compiling and using the _bash_ scripts on Linux
+To compile SVGparser.c on Linux use the script `build_linux.sh`. Linux requires to compile with C99 standard and to explicitly link math library because of some float functions that are needed by the parser (with w64devkit that's not necessary). Also, on Linux, the executable is called "a.out." To use the same _bash_ script on Windows and on Linux, one needs to change the name of the executable file from "a.out" to "a.exe". All this is done by the build script `build_linux.sh`. Also, on Linux one needs to explicitly type the ".sh" suffix in order to run the script.
+
+Therefore, on Linux one needs to call the build script in this way:
+
+```bash
+./build_linux.sh
+```
+
+To run the _bash_ scripts to run the compiled program, one needs to proceed in the same way as described in the previous section.
+
+Once the _bash_ scripts are run, the content can be copied by just selecting and right-cliking.
 
 #### Reading Windows batch files
 The Windows batch files use some conventions that are specific to them. A table of common expressions used in Windows batch files is shown below
@@ -139,10 +162,10 @@ Or the [ellipse4.sh](https://github.com/nilostolte/SVGPathParser/blob/main/src/e
 
 ```shell
 #!/bin/bash
-../a -r -p"fill=\"none\" stroke=\"red\" stroke-width=\"2\"" -ez -m"1 0 0 1 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
-../a -r -p"fill=\"none\" stroke=\"green\" stroke-width=\"2\"" -ez -m".70710678 .70710678 -0.70710678 .70710678 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
-../a -r -p"fill=\"none\" stroke=\"blue\" stroke-width=\"2\"" -ez -m"0 1 -1 0 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
-../a -r -p"fill=\"none\" stroke=\"magenta\" stroke-width=\"2\"" -ez -m"-.70710678 .70710678 -0.70710678 -.70710678 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
+../a.exe -r -p"fill=\"none\" stroke=\"red\" stroke-width=\"2\"" -ez -m"1 0 0 1 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
+../a.exe -r -p"fill=\"none\" stroke=\"green\" stroke-width=\"2\"" -ez -m".70710678 .70710678 -0.70710678 .70710678 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
+../a.exe -r -p"fill=\"none\" stroke=\"blue\" stroke-width=\"2\"" -ez -m"0 1 -1 0 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
+../a.exe -r -p"fill=\"none\" stroke=\"magenta\" stroke-width=\"2\"" -ez -m"-.70710678 .70710678 -0.70710678 -.70710678 100 100" "M 100 0 A 100 50 0 1 1 100 -1"
 ```
 The batch and script files force all four ellipses to be generated in relative coordinates ("-r"), with no fill, stroke width of 2, and each one with a different color ("-p"). Notice that the initial ellipse path is always the same and given in absolute coordinates. The ellipse is centered at the origin with initial point at (100, 0), end point at (100, -1), with x axis radius of 100, y axis radius of 50, and a zero degrees angle:
 
@@ -167,10 +190,10 @@ This example allows to easily understand the use of matrices to produce rotation
 </svg>
 ```
 
-The second simple example generates [6 ellipses](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse6.svg), each one rotated 30 degrees from the previous one. One uses [ellipse6.bat](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse6.bat) to generate the paths. Here the matrices produce rotations of 0°, 30°, 60°, 90°, 120°, and 150°, resulting in the following pattern:
+The second simple example generates [6 ellipses](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse6.svg), each one rotated 30 degrees from the previous one. One uses [ellipse6.bat](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse6.bat) or [ellipse6.sh](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse6.sh) to generate the paths. Here the matrices produce rotations of 0°, 30°, 60°, 90°, 120°, and 150°, resulting in the following pattern:
 
 <p align="center">
 <img src="https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse6.svg" width="250">
 </p>
 
-The more complex example combine both simpler examples above together in a single [svg file](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse46.svg). One uses [ellipse46.bat](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse46.bat) or [ellipse6.sh](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse6.sh) to generate the paths. The result was shown [above](https://github.com/nilostolte/SVGPathParser/tree/main#example-2-rotated-ellipses).
+The more complex example combine both simpler examples above together in a single [svg file](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse46.svg). One uses [ellipse46.bat](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse46.bat) or [ellipse46.sh](https://github.com/nilostolte/SVGPathParser/blob/main/src/ellipses/ellipse46.sh) to generate the paths. The result was shown [above](https://github.com/nilostolte/SVGPathParser/tree/main#example-2-rotated-ellipses).
