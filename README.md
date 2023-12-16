@@ -30,7 +30,7 @@ The program will display in the next line the same path in absolute coordinates:
 <path d="M100,0A100,50 0 1 1 100,-1"/>
 ```
 
-Since only the "d" attribute of the path is passed as a parameter here, the program only adds the path tag, besides converting the path to absolute coordinates as shown. To add more path attributes besides "d" one can use the "-p" command explained below. Notice that one can drop the "./" prefix when calling from a batch file. Also notice that "a.exe" ("a.out" on Linux) is the standard ouput of C/C++ compilers, when the executable is not explicitly named. For the sake of simplicity and since the source and the executable files are both unique in the directory containing them, "a.exe" is implictly refering to the source file "SVGparser.c".
+Since only the "d" attribute of the path is passed as a parameter here, the program only adds the path tag, besides converting the path to absolute coordinates as shown. To add more path attributes besides "d" one can use the "-p" command explained below. Notice that one can drop the "./" prefix when calling from a batch file. Also notice that "a.exe" ("a.out" on Linux) is the standard output of C/C++ compilers, when the executable is not explicitly named. For the sake of simplicity and since the source and the executable files are both unique in the directory containing them, "a.exe" is implictly refering to the source file "SVGparser.c".
 
 A summary of the commands that can be in the same line of the program call, all separated by spaces from one another, are shown in the table below:
 
