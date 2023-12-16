@@ -181,7 +181,7 @@ Notice that this path is not closed. This is done because ellipses and circles i
 
 This example allows to easily understand the use of matrices to produce rotations of 0°, 45°, 90° and 135°.  The generated paths contain exactly these angles with start and end point rotated by these angles about the ellipses center point, the point (100, 100) as seen in the translation part of the matrices.
 
-```svg
+```SVG
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 204 204">
 <path fill="none" stroke="red" stroke-width="2" d="M200,100a100,50 0 1 1 0,-1z"/>
 <path fill="none" stroke="green" stroke-width="2" d="M170.711,170.711a100,50 45 1 1 0.707,-0.707z"/>
